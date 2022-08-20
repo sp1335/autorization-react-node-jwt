@@ -7,20 +7,20 @@ const UserDto = require('../dtos/user-dto')
 
 class UserService {
     async registration(email, password) {
-        const candidate = await UserModel.findOne({ email })
-        if (candidate) { throw new Error(`${email} already taken`) }
+        const candidate = await UserModel.findOne({email})
+        if (candidate) {
+            throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`)
+        }
+        const hashPassword = await bcrypt.hash(password, 3);
+        const activationLink = uuid.v4(); // v34fa-asfasf-142saf-sa-asf
 
-        const hashPassword = await bcrypt.hash(password, 3)
-        const activationLink = uuid.v4()
+        const user = await UserModel.create({email, password: hashPassword, activationLink})
+        await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
+        const userDto = new UserDto(user); // id, email, isActivated
+        const tokens = tokenService.generateTokens({...userDto});
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-        const user = await UserModel.create({ email, hashPassword, activationLink })
-        await mailService.sendActivationMail(email, activationLink)
-
-        const userDto = UserDto(user)
-        const tokens = tokenService.generateTokens({ ...userDto })
-        await tokenService.saveToken(userDto.id, tokens.refreshToken)
-
-        return { ...tokens, user: userDto }
+        return {...tokens, user: userDto}
     }
 }
 
