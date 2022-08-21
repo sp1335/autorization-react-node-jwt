@@ -25,7 +25,7 @@ class UserService {
     async activate(activationLink){
         const user = await UserModel.findOne({activationLink})
         if(!user){
-            throw new Error('Activation link is invalide')
+            throw new Error('Invalide activation link')
         }
         user.isActivated = true
         await user.save()

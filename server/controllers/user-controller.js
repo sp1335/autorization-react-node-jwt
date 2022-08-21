@@ -1,3 +1,4 @@
+const userService = require('../service/user-service')
 const UserService = require('../service/user-service')
 
 class UserController {
@@ -29,8 +30,11 @@ class UserController {
     }
 
     async activate(req, res, next) {
+        console.log("jopa")
         try {
-
+            const activationLink = req.params.link
+            await userService.activate(activationLink)
+            return res.redirect(process.env.CLIENT_URL)
         } catch (e) {
 
         }
