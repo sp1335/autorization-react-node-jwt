@@ -31,13 +31,13 @@ class UserService {
         user.isActivated = true
         await user.save()
     }
-    async login(email,password){
+    async login(email, password) {
         const user = await UserModel.findOne({ email })
         if (!user) {
             throw ApiError.BadRequest(`User with ${email} adress doesn't exist`)
         }
         const isPassEquals = await bcrypt.compare(password, user.password);
-        if(!isPassEquals){
+        if (!isPassEquals) {
             throw ApiError.BadRequest(`Password doesn't match`)
         }
         const userDto = new UserDto(user); // id, email, isActivated
@@ -46,26 +46,29 @@ class UserService {
 
         return { ...tokens, user: userDto }
     }
-    async logout(refreshToken){
+    async logout(refreshToken) {
         const token = await tokenService.removeToken(refreshToken)
         return token;
     }
-    async refresh(refreshToken){
-        if(!refreshToken){
+    async refresh(refreshToken) {
+        if (!refreshToken) {
             throw ApiError.UnauthorizedError()
         }
         const userData = tokenService.validateRefreshToken(refreshToken);
         const tokenFromDb = await tokenService.findToken(refreshToken)
-        if(!userData||!tokenFromDb){
+        if (!userData || !tokenFromDb) {
             throw ApiError.UnauthorizedError()
         }
         const user = await UserModel.findById(userData.id)
         const userDto = new UserDto(user)
-        const tokens = tokenService.generateTokens({...userDto})
+        const tokens = tokenService.generateTokens({ ...userDto })
 
-        await tokenService.saveToken(userDto. id, tokens.refreshToken);
-        return {...tokens, user: userDto}
-
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+        return { ...tokens, user: userDto }
+    }
+    async getAllUsers() {
+        const users = await UserModel.find()
+        return users
     }
 }
 
