@@ -17,12 +17,13 @@ export default class Store{
     async login(email: string, password: string){
         try {
             const response = await AuthService.login(email,password)
+            console.log(response)
             localStorage.setItem('token', response.data.accessToken)
             this.setAuth(true)
             this.setUser(response.data.user)
         } catch (err) {
             if(err instanceof Error){
-                console.log(err.message)
+                console.log(err)
             }else{
                 console.log('Unexpected error',)
             }
@@ -31,12 +32,13 @@ export default class Store{
     async registration(email: string, password: string){
         try {
             const response = await AuthService.registration(email,password)
+            console.log(response)
             localStorage.setItem('token', response.data.accessToken)
             this.setAuth(true)
             this.setUser(response.data.user)
         } catch (err) {
             if(err instanceof Error){
-                console.log(err.message)
+                console.log(err)
             }else{
                 console.log('Unexpected error',)
             }
@@ -45,11 +47,16 @@ export default class Store{
     async logout(){
         try {
             const response = await AuthService.logout()
+            console.log(response)
             localStorage.removeItem('token')
             this.setAuth(false)
             this.setUser({} as iUser)
-        } catch (error) {
-            
+        } catch (err) {
+            if(err instanceof Error){
+                console.log(err)
+            }else{
+                console.log('Unexpected error',)
+            }
         }
     }
     
